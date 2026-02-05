@@ -1,5 +1,6 @@
 package com.pagoda.aiqueryselect.service;
 
+import com.pagoda.aiqueryselect.config.ConfigValue;
 import com.pagoda.aiqueryselect.config.DatabaseConfig;
 import com.pagoda.aiqueryselect.security.QueryValidator;
 import com.pagoda.aiqueryselect.security.QueryValidator.ValidationResult;
@@ -76,8 +77,13 @@ public class QueryService {
             return query;
         }
 
-        // Add FETCH FIRST N ROWS ONLY (Oracle 12c+ syntax)
-        return query + " FETCH FIRST " + maxRows + " ROWS ONLY";
+        if (ConfigValue.isOver12) {
+            // Oracle 12c+ syntax
+            return query + " FETCH FIRST " + maxRows + " ROWS ONLY";
+        } else {
+            // Oracle 11g and below syntax
+            return "SELECT * FROM (" + query + ") WHERE ROWNUM <= " + maxRows;
+        }
     }
 
     public record QueryResult(

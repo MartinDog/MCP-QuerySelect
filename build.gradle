@@ -27,6 +27,8 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-starter-mcp-server'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'com.oracle.database.jdbc:ojdbc11:23.5.0.24.07'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.2'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

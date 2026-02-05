@@ -1,11 +1,13 @@
 package com.pagoda.aiqueryselect.resources;
 
+import com.pagoda.aiqueryselect.config.ConfigValue;
 import com.pagoda.aiqueryselect.model.ColumnInfo;
 import com.pagoda.aiqueryselect.model.ConstraintInfo;
 import com.pagoda.aiqueryselect.model.ForeignKeyInfo;
 import com.pagoda.aiqueryselect.model.TableInfo;
 import com.pagoda.aiqueryselect.service.SchemaService;
 import org.springaicommunity.mcp.annotation.McpResource;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,7 +21,7 @@ public class DatabaseMcpResources {
     public DatabaseMcpResources(SchemaService schemaService) {
         this.schemaService = schemaService;
     }
-
+    @Cacheable("overview")
     @McpResource(
             uri = "schema://overview",
             name = "Database Schema Overview",
@@ -36,6 +38,14 @@ public class DatabaseMcpResources {
 
             StringBuilder sb = new StringBuilder();
             sb.append("# Database Schema Overview\n\n");
+
+            sb.append("## Database Info\n\n");
+            sb.append("**Oracle Version:** ").append(ConfigValue.oracleVersion).append("\n");
+            if (ConfigValue.isOver12) {
+                sb.append("**Pagination Syntax:** Use `FETCH FIRST N ROWS ONLY` (Oracle 12c+)\n\n");
+            } else {
+                sb.append("**Pagination Syntax:** Use `SELECT * FROM (query) WHERE ROWNUM <= N` (Oracle 11g and below)\n\n");
+            }
 
             int totalTables = schemas.values().stream().mapToInt(List::size).sum();
             sb.append("**Total Schemas:** ").append(schemas.size()).append("\n");
@@ -74,7 +84,7 @@ public class DatabaseMcpResources {
             return "# Database Schema Overview\n\nError generating schema overview: " + e.getMessage();
         }
     }
-
+    @Cacheable("relationships")
     @McpResource(
             uri = "schema://relationships",
             name = "Table Relationships",
@@ -119,6 +129,7 @@ public class DatabaseMcpResources {
         }
     }
 
+    @Cacheable(value="table", key ="#tableName")
     @McpResource(
             uri = "schema://table/{tableName}",
             name = "Table Schema",
